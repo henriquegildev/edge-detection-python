@@ -1,0 +1,46 @@
+import matplotlib.pyplot as plt
+from sklearn_genetic import GAFeatureSelectionCV
+from sklearn_genetic import GASearchCV
+from sklearn_genetic.space import Categorical, Integer, Continuous
+from sklearn.model_selection import train_test_split, StratifiedKFold
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.datasets import load_iris
+from sklearn.metrics import accuracy_score
+from sklearn_genetic.mlflow_log import MLflowConfig
+import numpy as np
+
+
+data = load_iris()
+label_names = data["target_names"]
+y = data["target"]
+X = data["data"]
+
+noise = np.random.uniform(1, 4, size=(X.shape[0], 5))
+
+X = np.hstack((X, noise))
+
+print(X.shape)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.33, random_state=42
+)
+
+clf = DecisionTreeClassifier()
+cv = StratifiedKFold(n_splits=3, shuffle=True)
+
+
+evolved_estimator = GAFeatureSelectionCV(
+    estimator=clf,
+    cv=cv,
+    scoring="accuracy",
+    population_size=30,
+    generations=20,
+    n_jobs=-1,
+    verbose=True,
+    keep_top_k=2,
+    elitism=True,
+)
+
+
+evolved_estimator.fit(X, y)
+print(evolved_estimator.best_features_)

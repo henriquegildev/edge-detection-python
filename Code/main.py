@@ -6,11 +6,12 @@ Fetch data
 """
 sample = cv2.imread("TestImages/man.jpg", 0)
 
-
 """
 Convolution Transform
 TODO: Explain this code and write documentation
 """
+
+
 def conv_transform(image):
     image_copy = image.copy()
     for i in range(image.shape[0]):
@@ -18,10 +19,13 @@ def conv_transform(image):
             image_copy[i][j] = image[image.shape[0] - i - 1][image.shape[1] - j - 1]
     return image_copy
 
+
 """
 Convolution
 TODO: Explain this code and write documentation
 """
+
+
 def conv(image, kernel_conv):
     kernel_conv = conv_transform(kernel_conv)
     image_h = image.shape[0]
@@ -45,9 +49,12 @@ def conv(image, kernel_conv):
     # cv2.imshow('Convolved_image', image_conv)
     return image_conv
 
+
 """
 Normalization of data, fetches array from the image
 """
+
+
 def norm(img1, img2):
     img_copy = np.zeros(img1.shape)
     for i in range(img1.shape[0]):
@@ -58,6 +65,7 @@ def norm(img1, img2):
             else:
                 img_copy[i][j] = 0
     return img_copy
+
 
 # Set size (col, line) of Kernel. Matrix 3x3
 kernel = np.zeros(shape=(3, 3))
