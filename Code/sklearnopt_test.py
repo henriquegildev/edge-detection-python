@@ -12,15 +12,13 @@ import sys
 
 start_time = time.time()
 
+# Data load
 data = load_digits()
 print(data)
 
 n_samples = len(data.images)
 X = data.images.reshape((n_samples, -1))
-print("X: ", X)
 y = data['target']
-print("y: ", y)
-
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.7)
 
 clf = RandomForestClassifier()
