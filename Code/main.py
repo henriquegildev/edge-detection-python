@@ -4,7 +4,7 @@ import numpy as np
 """
 Fetch data
 """
-sample = cv2.imread("TestImages/man.jpg", 0)
+sample = cv2.imread("TestImages/119082.jpg", 0)
 
 """
 Convolution Transform
