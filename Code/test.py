@@ -3,19 +3,15 @@ import glob
 import scipy.ndimage
 import imageio
 
-
 class DefinicoesClassificador:
     src_path_original = "C:/GitHub/edge-detection-python/Code/TestImages/Training/1-25/Original/"
     src_path_perfect = "C:/GitHub/edge-detection-python/Code/TestImages/Training/1-25/Perfect/"
     src_path_results = "C:/GitHub/edge-detection-python/Code/TestImages/Results/Images/"
     src_path_results_text = "C:/GitHub/edge-detection-python/Code/TestImages/Results/Text/"
 
-
 """
 Função que busca todas as imagens dentro da pasta indicada
 """
-
-
 def buscar_lista_de_treino(caminho):
     lista_de_treino = glob.glob(caminho + '/*')
     return lista_de_treino
@@ -25,8 +21,6 @@ def buscar_lista_de_treino(caminho):
 Função de custo, devolve a diferença entre a imagem perfeita e a imagem obtida pelo processo,
 tendo em conta o tamanho da imagem.
 """
-
-
 def comparar_imagens(perfeita, imperfeita):
     dif = np.abs(perfeita - imperfeita)
     res = np.sum(dif) / dif.size
@@ -34,6 +28,12 @@ def comparar_imagens(perfeita, imperfeita):
 
 
 if __name__ == '__main__':
+    photos_path = "C:/GitHub/edge-detection-python/Code/TestImages/Training"
+    original_photos_path = glob.glob(photos_path + "/*/Original/*")
+    perfect_photos_path = glob.glob(photos_path + "/*/Perfect/*")
+    print("Original Photos Paths: ", original_photos_path)
+    print("Perfect Photos Paths: ", perfect_photos_path)
+
     lista_de_treino = buscar_lista_de_treino(DefinicoesClassificador.src_path_original)
     for ficheiro_de_imagem in lista_de_treino:
         # Leitura de imagem, resultando num np.array
@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
         distancia = comparar_imagens(imagem_perfeita_float, g_normal)
         # print(scipy.ndimage.minimum(g_normal), scipy.ndimage.maximum(g_normal))
-        imageio.imwrite(DefinicoesClassificador.src_path_results + 'processed_{}.jpg'.format(nome),
+        imageio.imwrite(DefinicoesClassificador.src_path_results + 'processed_{}'.format(nome),
                         g_normal.astype(np.uint8))
         print(nome, "| distancia: ", distancia)
         # print(imagem.shape)
