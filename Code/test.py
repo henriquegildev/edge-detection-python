@@ -1,18 +1,20 @@
-import os
+import prettyprint
 import random
 import traceback
-from random import uniform
 from datetime import datetime
 import time
 import numpy as np
 import glob
 import scipy.ndimage
 import imageio
-from multiprocessing import Pool
 
+import threading  # Importing the threading module
 
+global lock
+lock = threading.Lock()
 randint = random.randint
-
+global rng
+rng = np.random.default_rng()
 
 
 class DefinicoesClassificador:
@@ -29,7 +31,7 @@ Função que busca todas as imagens dentro da pasta indicada
 
 
 def buscar_lista_de_treino(caminho):
-    print(caminho)
+    # print(caminho)
     lista_de_treino = glob.glob(caminho + '/*')
     return lista_de_treino
 
@@ -53,10 +55,10 @@ Input: None
 Returns: 
 """
 
-#-1
+
 def gerar_genoma():
-    return np.array([[uniform(-0.9, -1.1), uniform(-1.9, -2.1),uniform(-0.9, -1.1)], [0, 0, 0],
-                     [uniform(0.9, 1.1), uniform(1.9, 2.1),uniform(0.9, 1.1)]])
+    return np.array([[rng.uniform(-0.9, -1.1), rng.uniform(-1.9, -2.1), rng.uniform(-0.9, -1.1)], [0, 0, 0],
+                     [rng.uniform(0.9, 1.1), rng.uniform(1.9, 2.1), rng.uniform(0.9, 1.1)]])
 
 
 """
@@ -90,7 +92,7 @@ def selecionar_da_populacao(n: int, populacao: list):
     for i in new_pop_temp:
         new_pop.append(i[1])
     # print(new_pop)
-    print("Old population size: {} ~ New population size: {}".format(len(populacao), len(new_pop)))
+    # print("Old population size: {} ~ New population size: {}".format(len(populacao), len(new_pop)))
     return new_pop
 
 
@@ -116,7 +118,7 @@ def crossover(populacao: list):
                 while index in combinations[pos]:
                     pos = randint(0, len(populacao) - 1)
         except KeyError as err:
-            print("Something happened: ", err)
+            # print("Something happened: ", err)
             traceback.print_exc()
         combinations[index].append(pos)
         rand = populacao[pos]
@@ -133,8 +135,60 @@ def crossover(populacao: list):
         new_gene = np.array([listA[0], [0, 0, 0], listA[1]])
         new_pop.append(new_gene)
         index += 1
-    # print(new_pop)
     return new_pop
+
+
+def apply_genoma(genoma, g_normals, lista_genomas, lista_distancias, imagem_float, imagem_perfeita_float):
+    # input: genoma, g_normals, lista_genoma, lista_distancia, imagem_float, imagem_float_perfeita,y
+    # alterado: lista_genomas, lista_distancia, g_normals
+    hX = genoma
+    hY = np.transpose(hX)
+
+    gX = scipy.ndimage.convolve(imagem_float, hX)
+    gY = scipy.ndimage.convolve(imagem_float, hY)
+    g = np.abs(gX + gY)
+    g_normal = g * (255.0 / (scipy.ndimage.maximum(g) - scipy.ndimage.minimum(g)))
+
+    distancia = comparar_imagens(imagem_perfeita_float, g_normal)
+    # LOCK
+    lock.acquire()  # Lock
+    lista_genomas.append(hX)
+    lista_distancias.append(distancia)
+    g_normals.append(g_normal)
+    lock.release()  # Release
+    # UNLOCK
+
+
+def apply_image(populacao_results, imagem_perfeita_float, imagem_float, lowest):
+    # input : populacao_results, imagem_perfeita_float,imagem_float,lowest,y
+    # output: populacao_results, lowest
+    lista_distancias = []
+    lista_genomas = []
+    g_normals = []
+    # Aplicação de genoma
+    for genoma in populacao:
+        # Associar genomas a variáveis, sendo a Y transposta
+        # hX = np.array([[-1.0, -2.0, -1.0], [0, 0, 0], [1.0, 2.0, 1.0]])
+        # Start thread for filter aplication
+        thread = threading.Thread(target=apply_genoma, args=(genoma, g_normals, lista_genomas,
+                                                             lista_distancias, imagem_float,
+                                                             imagem_perfeita_float,))
+        # Launches thread
+        thread.start()
+    while threading.active_count() > 2:
+        pass
+
+    minimum = min(lista_distancias)
+    # media_val.append(minimum)
+    pos = lista_distancias.index(minimum)
+    imageio.imwrite(DefinicoesClassificador.src_path_results + 'processed_{}'.format(nome[y]),
+                    g_normals[pos].astype(np.uint8))
+    populacao_results.append([minimum, lista_genomas[pos]])
+    lowest.append([minimum, lista_genomas[pos]])
+    # print("Minimum: ", minimum, "\n", "Matrix: ", lista_genomas[pos])
+    # print(" Elapsed Time: {:4f} seconds | Minimum: {}".format(time.time() - start_time, minimum))
+    # print("Average Fitness: {} | Best Result: {}".format(sum(media_val) / len(media_val), minimum))
+
 
 if __name__ == '__main__':
     index = 0
@@ -142,8 +196,8 @@ if __name__ == '__main__':
     output_file = open(DefinicoesClassificador.src_path_results_text + "results{}.txt".format(num_file + 1), 'w')
     lista_de_treino = DefinicoesClassificador.src_path_original
     iterations = 10
-
-    populacao = gerar_populacao(100)
+    minimum = "None"
+    populacao = gerar_populacao(1000)
     size_of_pop = len(populacao)
     output_file.write(
         "Run Begin Time: {} | Run Number: {} | Projected Iterations: {} | Size of Population: {}\n".format(
@@ -151,7 +205,7 @@ if __name__ == '__main__':
             num_file,
             iterations,
             size_of_pop))
-
+    prettyprint.start_animation()
 
     total_img = len(lista_de_treino)
     imagem_raw = []
@@ -160,6 +214,7 @@ if __name__ == '__main__':
     imagem_perfeita_float = []
     lista_path = []
     nome = []
+    lowest = []
     for ficheiro_de_imagem in lista_de_treino:
         lista_path.append(ficheiro_de_imagem.split('\\'))
         nome.append(lista_path[-1][-1])
@@ -175,49 +230,29 @@ if __name__ == '__main__':
             np.array(imageio.imread(DefinicoesClassificador.src_path_perfect[index]), dtype=np.float64))
     start_time = time.time()
     for i in range(0, iterations):
-        print("New Cycle - Iteration: {}/{}".format(i + 1, iterations))
-        media_val = []
+        # print("New Cycle - Iteration: {}/{}".format(i + 1, iterations))
+        # media_val = []
         populacao_results = []
 
         for y in range(total_img):
-            print("Iterations: {}/{} | Index: {}/200 | File: {}".format(i + 1, iterations, y + 1, nome[y]))
+            prettyprint.set_text("Iterations: {}/{} | Index: {}/200 | File: {}".format(i + 1,
+                                                                                       iterations,
+                                                                                       y + 1,
+                                                                                       nome[
+                                                                                           y],
+                                                                                       ))
+            apply_image(populacao_results, imagem_perfeita_float[y], imagem_float[y], lowest)
 
-            lista_distancias = []
-            lista_genomas = []
-            # Aplicação de genoma
-            # Time Complexity O(n)
-            for genoma in populacao:
-                # Associar genomas a variáveis, sendo a Y transposta
-                # hX = np.array([[-1.0, -2.0, -1.0], [0, 0, 0], [1.0, 2.0, 1.0]])
-                hX = genoma
-                hY = np.transpose(hX)
-
-                gX = scipy.ndimage.convolve(imagem_float[y], hX)
-                gY = scipy.ndimage.convolve(imagem_float[y], hY)
-                g = np.abs(gX + gY)
-                g_normal = g * (255.0 / (scipy.ndimage.maximum(g) - scipy.ndimage.minimum(g)))
-
-                distancia = comparar_imagens(imagem_perfeita_float[y], g_normal)
-                lista_genomas.append(hX)
-                lista_distancias.append(distancia)
-
-            imageio.imwrite(DefinicoesClassificador.src_path_results + 'processed_{}'.format(nome[y]),
-                            g_normal.astype(np.uint8))
-            minimum = min(lista_distancias)
-            media_val.append(minimum)
-            pos = lista_distancias.index(minimum)
-            populacao_results.append([minimum, lista_genomas[pos]])
-            # print("Minimum: ", minimum, "\n", "Matrix: ", lista_genomas[pos])
-            print(" Elapsed Time: {:4f} seconds | Minimum: {}".format(time.time() - start_time, minimum))
-            print("Average Fitness: {} | Best Result: {}".format(sum(media_val) / len(media_val), minimum))
-            output_file.write(
-                "Average Fitness: {} | Iteration: {}/{} | File: {} \n".format((sum(media_val) / len(media_val)), i + 1,
-                                                                              iterations, nome))
         populacao_tmp = selecionar_da_populacao(size_of_pop, populacao_results)
         populacao = crossover(populacao_tmp)
         encher_populacao(int(0.8 * size_of_pop), populacao)
         populacao = populacao + populacao_tmp
-
+        low = min(lowest)
+        # print(min(lowest))
+        output_file.write(
+            "Minimum: {} | Iteration: {}/{} | File: {} \n Matrix: {}\n | \n".format(low[0], i + 1,
+                                                                                    iterations, nome[y], low[1]))
 output_file.write("--- Final Time: {:4f} seconds ---".format(time.time() - start_time))
 output_file.close()
+prettyprint.stop_animation()
 print("--- Final time: %s seconds ---" % (time.time() - start_time))
