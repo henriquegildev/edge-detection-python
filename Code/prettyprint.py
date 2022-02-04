@@ -19,7 +19,7 @@ def animate():
         time.sleep(1)
     sys.stdout.write('\r' + text + " [Time Elapsed: {:4f} seconds]".format((time.time() - start_time)) + ' - done!     \t')
 
-# Call this to stop the whole shindig :)
+# Call this to stop the whole shindig :slight_smile:
 def stop_animation():
     global done
     done = True

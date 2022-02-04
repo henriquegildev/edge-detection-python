@@ -1,3 +1,5 @@
+import os
+
 import prettyprint
 import random
 import traceback
@@ -7,8 +9,7 @@ import numpy as np
 import glob
 import scipy.ndimage
 import imageio
-
-import threading  # Importing the threading module
+import threading
 
 global lock
 lock = threading.Lock()
@@ -57,7 +58,7 @@ Returns:
 
 
 def gerar_genoma():
-    return np.array([[rng.uniform(-0.9, -1.1), rng.uniform(-1.9, -2.1), rng.uniform(-0.9, -1.1)], [0, 0, 0],
+    return np.array([[rng.uniform(-1.1, -0.9), rng.uniform(-2.1, -1.9), rng.uniform(-1.1, -0.9)], [0, 0, 0],
                      [rng.uniform(0.9, 1.1), rng.uniform(1.9, 2.1), rng.uniform(0.9, 1.1)]])
 
 
@@ -159,7 +160,7 @@ def apply_genoma(genoma, g_normals, lista_genomas, lista_distancias, imagem_floa
     # UNLOCK
 
 
-def apply_image(populacao_results, imagem_perfeita_float, imagem_float, lowest):
+def apply_image(populacao_results, imagem_perfeita_float, imagem_float, lowest, nome, i):
     # input : populacao_results, imagem_perfeita_float,imagem_float,lowest,y
     # output: populacao_results, lowest
     lista_distancias = []
@@ -181,8 +182,10 @@ def apply_image(populacao_results, imagem_perfeita_float, imagem_float, lowest):
     minimum = min(lista_distancias)
     # media_val.append(minimum)
     pos = lista_distancias.index(minimum)
-    imageio.imwrite(DefinicoesClassificador.src_path_results + 'processed_{}'.format(nome[y]),
-                    g_normals[pos].astype(np.uint8))
+
+    imageio.imwrite(
+        DefinicoesClassificador.src_path_results + '/Iteration_{}/processed_{:2f}_{}'.format(i, minimum, nome),
+        g_normals[pos].astype(np.uint8))
     populacao_results.append([minimum, lista_genomas[pos]])
     lowest.append([minimum, lista_genomas[pos]])
     # print("Minimum: ", minimum, "\n", "Matrix: ", lista_genomas[pos])
@@ -192,8 +195,9 @@ def apply_image(populacao_results, imagem_perfeita_float, imagem_float, lowest):
 
 if __name__ == '__main__':
     index = 0
+
     num_file = len(glob.glob(DefinicoesClassificador.src_path_results_text + 'results*.txt'))
-    output_file = open(DefinicoesClassificador.src_path_results_text + "results{}.txt".format(num_file + 1), 'w')
+    output_file = open(DefinicoesClassificador.src_path_results_text + "results{}.txt".format(num_file + 1), 'w+')
     lista_de_treino = DefinicoesClassificador.src_path_original
     iterations = 10
     minimum = "None"
@@ -205,8 +209,8 @@ if __name__ == '__main__':
             num_file,
             iterations,
             size_of_pop))
-    prettyprint.start_animation()
 
+    prettyprint.start_animation()
     total_img = len(lista_de_treino)
     imagem_raw = []
     imagem_float = []
@@ -228,12 +232,13 @@ if __name__ == '__main__':
         # imagem_perfeita.append(imageio.imread(DefinicoesClassificador.src_path_perfect[index]))
         imagem_perfeita_float.append(
             np.array(imageio.imread(DefinicoesClassificador.src_path_perfect[index]), dtype=np.float64))
+
     start_time = time.time()
     for i in range(0, iterations):
         # print("New Cycle - Iteration: {}/{}".format(i + 1, iterations))
         # media_val = []
         populacao_results = []
-
+        os.makedirs(DefinicoesClassificador.src_path_results + 'Iteration_{}'.format(i+1), exist_ok=True)
         for y in range(total_img):
             prettyprint.set_text("Iterations: {}/{} | Index: {}/200 | File: {}".format(i + 1,
                                                                                        iterations,
@@ -241,18 +246,18 @@ if __name__ == '__main__':
                                                                                        nome[
                                                                                            y],
                                                                                        ))
-            apply_image(populacao_results, imagem_perfeita_float[y], imagem_float[y], lowest)
+            apply_image(populacao_results, imagem_perfeita_float[y], imagem_float[y], lowest, nome[y], i + 1)
 
         populacao_tmp = selecionar_da_populacao(size_of_pop, populacao_results)
         populacao = crossover(populacao_tmp)
         encher_populacao(int(0.8 * size_of_pop), populacao)
         populacao = populacao + populacao_tmp
         low = min(lowest)
-        # print(min(lowest))
         output_file.write(
-            "Minimum: {} | Iteration: {}/{} | File: {} \n Matrix: {}\n | \n".format(low[0], i + 1,
-                                                                                    iterations, nome[y], low[1]))
-output_file.write("--- Final Time: {:4f} seconds ---".format(time.time() - start_time))
-output_file.close()
-prettyprint.stop_animation()
+            "Minimum: {} | Iteration: {}/{} | File: {} \n Matrix: {}\n".format(low[0], i + 1,
+                                                                               iterations, nome[y], low[1]))
+    output_file.write("--- Final Time: {:4f} seconds ---".format(time.time() - start_time))
+    output_file.close()
+    prettyprint.stop_animation()
+
 print("--- Final time: %s seconds ---" % (time.time() - start_time))
