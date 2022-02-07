@@ -2,6 +2,9 @@ import os
 import matplotlib as plt
 import prettyprint
 # import ploting
+
+import prettyprint
+import GUI.gui_ed as gui
 import random
 import traceback
 from datetime import datetime
