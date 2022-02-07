@@ -145,6 +145,42 @@ def crossover(populacao: list):
     return new_pop
 
 
+"""
+Nome: random_mutation
+Desc.: Gera mutações aleatoriamente em 1% da população
+Input: populacao -> list(genoma);
+"""
+
+# Gerar mutações aleatoriamente
+# Ocorrencias que podem ser pior ou melhor
+def random_mutation(populacao: list):
+    # Usar 10% da população
+    num_random_alter = int(len(populacao) * 0.1)
+
+    # criar um array com i aleatorios do array população - 10%
+    random_population_alter = np.random.choice(np.arange(0, len(populacao)), size=num_random_alter, replace=False)
+
+    new_pop = []
+    for i in random_population_alter:
+        gene = populacao[i]
+        g_a = list(gene[0])
+        g_b = list(gene[2])
+        new_gene_tmp = g_a + g_b
+        print("new_gene_tmp - ", i, new_gene_tmp)
+        rnd = np.random.choice([0, 1, 2, 3, 4, 5])
+        if rnd >= 3:
+            if rnd == 4:
+                new_gene_tmp[rnd] = rng.uniform(1.8, 2.2)
+            else:
+                new_gene_tmp[rnd] = rng.uniform(0.8, 1.2)
+        else:
+            if rnd == 1:
+                new_gene_tmp[rnd] = rng.uniform(-2.2, -1.8)
+            else:
+                new_gene_tmp[rnd] = rng.uniform(-1.2, -0.8)
+        new_gene = np.array([new_gene_tmp[:3], [0, 0, 0], new_gene_tmp[3:]])
+
+
 def apply_genoma(genoma, g_normals, lista_genomas, lista_distancias, imagem_float, imagem_perfeita_float):
     # input: genoma, g_normals, lista_genoma, lista_distancia, imagem_float, imagem_float_perfeita,y
     # alterado: lista_genomas, lista_distancia, g_normals
@@ -199,6 +235,7 @@ def apply_image(populacao_results, imagem_perfeita_float, imagem_float, lowest, 
     # print("Average Fitness: {} | Best Result: {}".format(sum(media_val) / len(media_val), minimum))
 
 
+
 if __name__ == '__main__':
     index = 0
 
@@ -225,6 +262,8 @@ if __name__ == '__main__':
     lista_path = []
     nome = []
     lowest = []
+
+
     for ficheiro_de_imagem in lista_de_treino:
         lista_path.append(ficheiro_de_imagem.split('\\'))
         nome.append(lista_path[-1][-1])
@@ -256,9 +295,17 @@ if __name__ == '__main__':
 
         populacao_tmp = selecionar_da_populacao(size_of_pop, populacao_results)
         populacao = crossover(populacao_tmp)
+        mutation_pop = randomMutation(populacao_tmp)
         encher_populacao(int(0.8 * size_of_pop), populacao)
         populacao = populacao + populacao_tmp
-        low = min(lowest)
+
+        low = None
+        while low is None:
+            try:
+                low = min(lowest)
+            except ValueError:
+                pass
+
         # ploting.animate(i, low)
         output_file.write(
             "Minimum: {} | Iteration: {}/{} | File: {} \n Matrix: {}\n".format(low[0], i + 1,

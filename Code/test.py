@@ -1,6 +1,10 @@
 import os
+import matplotlib as plt
+import prettyprint
+# import ploting
 
 import prettyprint
+import GUI.gui_ed as gui
 import random
 import traceback
 from datetime import datetime
@@ -111,11 +115,12 @@ def crossover(populacao: list):
     combinations = {}
     new_pop = []
     index = 0
+    num_cross = randint(1, 5)
     for i in populacao:
         combinations[index] = []
         pos = randint(0, len(populacao) - 1)
         try:
-            if pos in combinations:
+            if pos in combinations or pos == i:
                 while index in combinations[pos]:
                     pos = randint(0, len(populacao) - 1)
         except KeyError as err:
@@ -123,18 +128,19 @@ def crossover(populacao: list):
             traceback.print_exc()
         combinations[index].append(pos)
         rand = populacao[pos]
-        g1_a, g1_b, g2_a, g2_b = list(i[0]), list(i[2]), list(rand[0]), list(rand[2])
-        list_genesA, list_genesB = [g1_a, g2_a], [g1_b, g2_b]
-        listA, listB = [[], []], [list_genesA, list_genesB]
-        for par in range(0, 2):
-            for x in range(0, 3):
-                pos1 = randint(0, len(list_genesA) - 1)
-                gene = listB[par][pos1]
-                pos2 = randint(0, len(gene) - 1)
-                chr = gene[pos2]
-                listA[par].append(chr)
-        new_gene = np.array([listA[0], [0, 0, 0], listA[1]])
-        new_pop.append(new_gene)
+        g1_a, g1_b = list(i[0]), list(i[2])
+        g2_a, g2_b = list(rand[0]), list(rand[2])
+        new_gene1_tmp = g1_a + g1_b # a
+        new_gene2_tmp = g2_a + g2_b # b
+
+        new_gene1_tmp_a = new_gene2_tmp[:num_cross] + new_gene1_tmp[num_cross:]
+        new_gene2_tmp_a = new_gene1_tmp[:num_cross] + new_gene2_tmp[num_cross:]
+
+        new_gene1 = np.array([new_gene1_tmp_a[:3], [0, 0, 0], new_gene1_tmp_a[3:]])
+        new_gene2 = np.array([new_gene2_tmp_a[:3], [0, 0, 0], new_gene2_tmp_a[3:]])
+        new_pop.append(new_gene1)
+        new_pop.append(new_gene2)
+
         index += 1
     return new_pop
 
@@ -201,7 +207,7 @@ if __name__ == '__main__':
     lista_de_treino = DefinicoesClassificador.src_path_original
     iterations = 10
     minimum = "None"
-    populacao = gerar_populacao(1000)
+    populacao = gerar_populacao(10)
     size_of_pop = len(populacao)
     output_file.write(
         "Run Begin Time: {} | Run Number: {} | Projected Iterations: {} | Size of Population: {}\n".format(
@@ -238,7 +244,7 @@ if __name__ == '__main__':
         # print("New Cycle - Iteration: {}/{}".format(i + 1, iterations))
         # media_val = []
         populacao_results = []
-        os.makedirs(DefinicoesClassificador.src_path_results + 'Iteration_{}'.format(i+1), exist_ok=True)
+        os.makedirs(DefinicoesClassificador.src_path_results + 'Iteration_{}'.format(i + 1), exist_ok=True)
         for y in range(total_img):
             prettyprint.set_text("Iterations: {}/{} | Index: {}/200 | File: {}".format(i + 1,
                                                                                        iterations,
@@ -253,6 +259,7 @@ if __name__ == '__main__':
         encher_populacao(int(0.8 * size_of_pop), populacao)
         populacao = populacao + populacao_tmp
         low = min(lowest)
+        # ploting.animate(i, low)
         output_file.write(
             "Minimum: {} | Iteration: {}/{} | File: {} \n Matrix: {}\n".format(low[0], i + 1,
                                                                                iterations, nome[y], low[1]))

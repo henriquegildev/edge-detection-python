@@ -78,11 +78,9 @@ class TrainPage(tk.Frame):
         n_population_entry.place(x=160, y=300)
         n_iterations_entry.insert(0, "10")
         n_population_entry.insert(0, "1000")
+        #def get_input_dir():
+        #print("O diretorio escolhido foi: ", dir_entry.get())
 
-
-
-        # def get_input_dir():
-        #   print("O diretorio escolhido foi: ", dir_entry.get())
 
 class TestPage(tk.Frame):
     def __init__(self, parent, controller):
