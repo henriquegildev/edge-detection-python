@@ -166,7 +166,6 @@ def random_mutation(populacao: list):
         g_a = list(gene[0])
         g_b = list(gene[2])
         new_gene_tmp = g_a + g_b
-        print("new_gene_tmp - ", i, new_gene_tmp)
         rnd = np.random.choice([0, 1, 2, 3, 4, 5])
         if rnd >= 3:
             if rnd == 4:
@@ -295,7 +294,6 @@ if __name__ == '__main__':
 
         populacao_tmp = selecionar_da_populacao(size_of_pop, populacao_results)
         populacao = crossover(populacao_tmp)
-        mutation_pop = randomMutation(populacao_tmp)
         encher_populacao(int(0.8 * size_of_pop), populacao)
         populacao = populacao + populacao_tmp
 

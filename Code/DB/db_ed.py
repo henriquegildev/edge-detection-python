@@ -24,12 +24,12 @@ con.commit()
 for row in cur.execute('''SELECT * FROM galery'''):
 
 
-def add_selected_photos(selected_photos):
-    for photos in selected_photos:
-        cur.execute('''INSERT OR IGNORE INTO photos VALUES
-                            ("", "", "")''')
+#def add_selected_photos(selected_photos):
+#    for photos in selected_photos:
+ #       cur.execute('''INSERT OR IGNORE INTO photos VALUES
+  #                          ("", "", "")''')
 
 
 
 
-    print(row)
+   # print(row)
