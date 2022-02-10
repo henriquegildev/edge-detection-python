@@ -21,7 +21,7 @@ cur.execute('''CREATE TABLE IF NOT EXISTS perfect_photos
 con.commit()
 
 
-for row in cur.execute('''SELECT * FROM galery'''):
+#for row in cur.execute('''SELECT * FROM galery'''):
 
 
 #def add_selected_photos(selected_photos):

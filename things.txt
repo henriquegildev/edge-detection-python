@@ -1,0 +1,30 @@
+for i in range(total_img):
+  apply_genoma()
+# obter media de distancias
+
+def apply_genoma():
+  # adicionar imageio.write
+
+-------------------------------
+
+- preciso da parte de cima mas
+não preciso da parte de baixo
+pois apenas vai ser corrido uma vez
+
+- gerar as listas com dois ciclos for
+
+- criar uma nova diretoria com as
+imagens resultantes da aplicação
+da melhor matriz - linha 245
+
+- não fazer for da linha 241
+
+- apply genoma - linha 147 dentro
+
+
+
+Sobel Operator
+Robinson Operator
+Fri-Chen Operator
+
+
