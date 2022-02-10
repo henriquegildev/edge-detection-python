@@ -28,6 +28,7 @@ class DefinicoesClassificador:
     src_path_perfect = glob.glob(src_path + "/*/Perfect/*")
     src_path_results = "./TestImages/Results/Images/"
     src_path_results_text = "./TestImages/Results/Text/"
+    src_path_recover = "./TestImages/Recover/"
 
 
 """
@@ -36,7 +37,6 @@ Função que busca todas as imagens dentro da pasta indicada
 
 
 def buscar_lista_de_treino(caminho):
-    # print(caminho)
     lista_de_treino = glob.glob(caminho + '/*')
     return lista_de_treino
 
@@ -61,9 +61,16 @@ Returns:
 """
 
 
-def gerar_genoma():
-    return np.array([[rng.uniform(-1.1, -0.9), rng.uniform(-2.1, -1.9), rng.uniform(-1.1, -0.9)], [0, 0, 0],
-                     [rng.uniform(0.9, 1.1), rng.uniform(1.9, 2.1), rng.uniform(0.9, 1.1)]])
+def gerar_genoma(operator=0):
+    if operator == 0:  # Sobel Operator
+        return np.array([[rng.uniform(-1.1, -0.9), rng.uniform(-2.1, -1.9), rng.uniform(-1.1, -0.9)], [0, 0, 0],
+                         [rng.uniform(0.9, 1.1), rng.uniform(1.9, 2.1), rng.uniform(0.9, 1.1)]])
+    elif operator == 1:  # Robinson Operator
+        return np.array([[rng.uniform(-1.1, -0.9), rng.uniform(-1.1, -0.9), rng.uniform(-1.1, -0.9)], [0, 0, 0],
+                         [rng.uniform(0.9, 1.1), rng.uniform(0.9, 1.1), rng.uniform(0.9, 1.1)]])
+    elif operator == 2:  # Fri-Chen Operator
+        return np.array([[rng.uniform(-1.1, -0.9), rng.uniform(-1.5, -1.3), rng.uniform(-1.1, -0.9)], [0, 0, 0],
+                         [rng.uniform(0.9, 1.1), rng.uniform(1.3, 1.5), rng.uniform(0.9, 1.1)]])
 
 
 """
@@ -73,8 +80,8 @@ Input: N -> int;
 """
 
 
-def gerar_populacao(n):
-    return [gerar_genoma() for _ in range(n)]
+def gerar_populacao(n, i=0):
+    return [gerar_genoma(i) for _ in range(n)]
 
 
 def encher_populacao(n, populacao):
@@ -103,7 +110,7 @@ def selecionar_da_populacao(n: int, populacao: list):
 
 """
 Nome: Crossover
-Desc.: Seleciona da população o top 10%
+Desc.: Realiza troca de genes entre os melhores 10% da populacao
 Input: populacao -> list(genoma); comparar_imagens -> original_image, processed_image; original_image -> np.array(float64); processed_image -> np.array(float64)
 """
 
@@ -120,18 +127,17 @@ def crossover(populacao: list):
         combinations[index] = []
         pos = randint(0, len(populacao) - 1)
         try:
-            if pos in combinations or pos == i:
+            if pos in combinations or populacao[pos] is i:
                 while index in combinations[pos]:
                     pos = randint(0, len(populacao) - 1)
         except KeyError as err:
-            # print("Something happened: ", err)
-            traceback.print_exc()
+            pass
         combinations[index].append(pos)
         rand = populacao[pos]
         g1_a, g1_b = list(i[0]), list(i[2])
         g2_a, g2_b = list(rand[0]), list(rand[2])
-        new_gene1_tmp = g1_a + g1_b # a
-        new_gene2_tmp = g2_a + g2_b # b
+        new_gene1_tmp = g1_a + g1_b  # a
+        new_gene2_tmp = g2_a + g2_b  # b
 
         new_gene1_tmp_a = new_gene2_tmp[:num_cross] + new_gene1_tmp[num_cross:]
         new_gene2_tmp_a = new_gene1_tmp[:num_cross] + new_gene2_tmp[num_cross:]
@@ -150,6 +156,7 @@ Nome: random_mutation
 Desc.: Gera mutações aleatoriamente em 1% da população
 Input: populacao -> list(genoma);
 """
+
 
 # Gerar mutações aleatoriamente
 # Ocorrencias que podem ser pior ou melhor
@@ -178,6 +185,15 @@ def random_mutation(populacao: list):
             else:
                 new_gene_tmp[rnd] = rng.uniform(-1.2, -0.8)
         new_gene = np.array([new_gene_tmp[:3], [0, 0, 0], new_gene_tmp[3:]])
+        new_pop.append(new_gene)
+    return new_pop
+
+
+"""
+Nome: apply_genoma
+Desc.: Aplica o genoma
+Input: genoma, g_normals, lista_genoma, lista_distancia, imagem_float, imagem_float_perfeita,y
+"""
 
 
 def apply_genoma(genoma, g_normals, lista_genomas, lista_distancias, imagem_float, imagem_perfeita_float):
@@ -199,6 +215,13 @@ def apply_genoma(genoma, g_normals, lista_genomas, lista_distancias, imagem_floa
     g_normals.append(g_normal)
     lock.release()  # Release
     # UNLOCK
+
+
+"""
+Nome: apply_image
+Desc.: Aplica o genoma a cada imagem
+Input: populacao_results, imagem_perfeita_float, imagem_float : float, lowest : list, nome : string, i : int index
+"""
 
 
 def apply_image(populacao_results, imagem_perfeita_float, imagem_float, lowest, nome, i):
@@ -234,16 +257,33 @@ def apply_image(populacao_results, imagem_perfeita_float, imagem_float, lowest, 
     # print("Average Fitness: {} | Best Result: {}".format(sum(media_val) / len(media_val), minimum))
 
 
+"""
+Nome: recover
+Desc.: Escreve o melhor resultado do treino para um ficheiro de texto
+Input: value, best_genome, num_file
+"""
+
+
+def recover(value, best_genome):
+    out = open(DefinicoesClassificador.src_path_recover + "gene.txt", 'w+')
+    gene = list(best_genome[0]) + list(best_genome[2])
+    out.write("Distance: {}".format(value) + "\n")
+    for i in gene:
+        out.write(str(i) + "\n")
+    out.close()
+
 
 if __name__ == '__main__':
-    index = 0
+    prettyprint.start_animation()
 
+    index = 0
     num_file = len(glob.glob(DefinicoesClassificador.src_path_results_text + 'results*.txt'))
     output_file = open(DefinicoesClassificador.src_path_results_text + "results{}.txt".format(num_file + 1), 'w+')
     lista_de_treino = DefinicoesClassificador.src_path_original
     iterations = 10
     minimum = "None"
-    populacao = gerar_populacao(10)
+    operator = 0
+    populacao = gerar_populacao(1000, operator)
     size_of_pop = len(populacao)
     output_file.write(
         "Run Begin Time: {} | Run Number: {} | Projected Iterations: {} | Size of Population: {}\n".format(
@@ -252,7 +292,6 @@ if __name__ == '__main__':
             iterations,
             size_of_pop))
 
-    prettyprint.start_animation()
     total_img = len(lista_de_treino)
     imagem_raw = []
     imagem_float = []
@@ -261,7 +300,6 @@ if __name__ == '__main__':
     lista_path = []
     nome = []
     lowest = []
-
 
     for ficheiro_de_imagem in lista_de_treino:
         lista_path.append(ficheiro_de_imagem.split('\\'))
@@ -279,8 +317,6 @@ if __name__ == '__main__':
 
     start_time = time.time()
     for i in range(0, iterations):
-        # print("New Cycle - Iteration: {}/{}".format(i + 1, iterations))
-        # media_val = []
         populacao_results = []
         os.makedirs(DefinicoesClassificador.src_path_results + 'Iteration_{}'.format(i + 1), exist_ok=True)
         for y in range(total_img):
@@ -292,22 +328,21 @@ if __name__ == '__main__':
                                                                                        ))
             apply_image(populacao_results, imagem_perfeita_float[y], imagem_float[y], lowest, nome[y], i + 1)
 
-        populacao_tmp = selecionar_da_populacao(size_of_pop, populacao_results)
-        populacao = crossover(populacao_tmp)
-        encher_populacao(int(0.8 * size_of_pop), populacao)
-        populacao = populacao + populacao_tmp
-
-        low = None
-        while low is None:
-            try:
-                low = min(lowest)
-            except ValueError:
-                pass
+        populacao_tmp = selecionar_da_populacao(size_of_pop, populacao_results)  # 10%
+        populacao = crossover(populacao_tmp)  # 10%
+        pop_mutation = random_mutation(populacao_tmp)  # +1%
+        encher_populacao(int(0.79 * size_of_pop), populacao)  # 10% + 79%
+        populacao = populacao + populacao_tmp + pop_mutation  # 79% + 10% + 1%
+        sorted(lowest, key=lambda x: x[0])
+        low = lowest[0]
 
         # ploting.animate(i, low)
         output_file.write(
-            "Minimum: {} | Iteration: {}/{} | File: {} \n Matrix: {}\n".format(low[0], i + 1,
-                                                                               iterations, nome[y], low[1]))
+            "Minimum: {} | Iteration: {}/{} | \n Matrix: {}\n".format(low[0], i + 1,
+                                                                      iterations, low[1]))
+    sorted(lowest, key=lambda x: x[0])
+    low = lowest[0]
+    recover(low[0], low[1])
     output_file.write("--- Final Time: {:4f} seconds ---".format(time.time() - start_time))
     output_file.close()
     prettyprint.stop_animation()
