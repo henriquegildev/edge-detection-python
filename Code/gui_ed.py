@@ -1,12 +1,9 @@
-import glob
 import tkinter as tk
-from tkinter import *
-from PIL import ImageTk, Image
 from tkinter import ttk
-import train
 
 TITLE_FONT = ('Helvetica', 17, 'bold')
 BUTTON_FONT = ('Helvetica', 12, 'bold')
+from pynput.keyboard import Key, Controller
 
 class App(tk.Tk): #inherit tkinter
     def __init__(self, *args, **kwargs): #automatic startup fuction
@@ -33,9 +30,6 @@ class App(tk.Tk): #inherit tkinter
         frame = self.frames[cont]
         frame.tkraise()
 
-def qf(param):
-    print(param)
-
 class HomePage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
@@ -47,8 +41,9 @@ class HomePage(tk.Frame):
         label.place(x=180, y=150)
 
         button1 = tk.Button(self, text="Treinar", font=BUTTON_FONT, padx=40, pady=15, fg="white", bg="#363636", command=lambda: controller.show_frame(TrainPage))
-        button2 = tk.Button(self, text="Testar", font=BUTTON_FONT, padx=40, pady=15, fg="white", bg="#363636", command=lambda: controller.show_frame(TestPage))
         button1.place(x=300, y=350)
+
+        button2 = tk.Button(self, text="Testar", font=BUTTON_FONT, padx=40, pady=15, fg="white", bg="#363636", command=lambda: controller.show_frame(TestPage))
         button2.place(x=550, y=350)
 
 class TrainPage(tk.Frame):
@@ -63,41 +58,30 @@ class TrainPage(tk.Frame):
 
         button1 = tk.Button(self, text="Página Inicial", font=BUTTON_FONT, padx=10, pady=10, fg="white", bg="#363636",
                             command=lambda: controller.show_frame(HomePage))
-        button3 = tk.Button(self, text="Parar Treino", font=BUTTON_FONT, padx=40, pady=20, fg="white", bg="#363636",
-                            command=lambda: stop_execution())
         button1.place(x=30, y=30)
-        button3.place(x=550, y=440)
-
 
         n_iterations_label = tk.Label(self, text='Introduza o número de iterações: ', font=BUTTON_FONT, fg="white", bg="#121212")
-        n_iterations_entry = tk.Entry(self, font=BUTTON_FONT, width=30)
-        n_population_label = tk.Label(self, text='Introduza o número de população: ', font=BUTTON_FONT, fg="white", bg="#121212")
-        n_population_entry = tk.Entry(self, font=BUTTON_FONT, width=30)
-        choose_operator_label = tk.Label(self, text='Escolha um operador base: ', font=BUTTON_FONT, fg="white", bg="#121212")
         n_iterations_label.place(x=160, y=200)
-        n_iterations_entry.place(x=160, y=230)
-        n_population_label.place(x=160, y=275)
-        n_population_entry.place(x=160, y=305)
-        choose_operator_label.place(x=160, y=345)
+        n_iterations_entry = tk.Entry(self, font=BUTTON_FONT, width=30)
         n_iterations_entry.insert(0, "10")
-        n_population_entry.insert(0, "1000")
-        #def get_input_dir():
-        #print("O diretorio escolhido foi: ", dir_entry.get())
+        n_iterations_entry.place(x=160, y=230)
 
-        n = tk.StringVar()
-        operator_options = ttk.Combobox(self, width=42, textvariable=n)
+        n_population_label = tk.Label(self, text='Introduza o número de população: ', font=BUTTON_FONT, fg="white", bg="#121212")
+        n_population_label.place(x=160, y=275)
+        n_population_entry = tk.Entry(self, font=BUTTON_FONT, width=30)
+        n_population_entry.insert(0, "1000")
+        n_population_entry.place(x=160, y=305)
+
+        choose_operator_label = tk.Label(self, text='Escolha um operador base: ', font=BUTTON_FONT, fg="white", bg="#121212")
+        choose_operator_label.place(x=160, y=345)
+        choose_operator = tk.StringVar()
+        operator_options = ttk.Combobox(self, width=42, textvariable=choose_operator)
         operator_options['values'] = ("Sobel Operator", "Robinson Operator", "Fri-Chen Operator")
         operator_options.place(x=160, y=375)
 
         button2 = tk.Button(self, text="Iniciar Treino", font=BUTTON_FONT, padx=40, pady=20, fg="white", bg="#363636",
-                            command=lambda: press_start_button(n_iterations_entry.get(), n_population_entry.get(), get_operator(operator_options.get())))
+                            command=lambda: press_train_start(n_iterations_entry.get(), n_population_entry.get(), get_operator(operator_options.get())))
         button2.place(x=250, y=440)
-
-
-        #button2 = tk.Button(self, text="Iniciar Treino", font=BUTTON_FONT, padx=40, pady=20, fg="white", bg="#363636",
-          #                  command=lambda: hold(n_iterations_entry.get(), n_population_entry.get(), operator_options.get()))
-        #button2.place(x=250, y=440)
-
 
 class TestPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -111,35 +95,17 @@ class TestPage(tk.Frame):
 
         button1 = tk.Button(self, text="Página Inicial", font=BUTTON_FONT, padx=10, pady=10, fg="white", bg="#363636",
                             command=lambda: controller.show_frame(HomePage))
-        button2 = tk.Button(self, text="Iniciar Teste ", font=BUTTON_FONT, padx=40, pady=20, fg="white", bg="#363636")
-        button3 = tk.Button(self, text="Parar Teste", font=BUTTON_FONT, padx=40, pady=20, fg="white", bg="#363636",
-                            command=lambda: stop_execution())
         button1.place(x=30, y=30)
+
+        button2 = tk.Button(self, text="Iniciar Teste ", font=BUTTON_FONT, padx=40, pady=20, fg="white", bg="#363636", command=lambda: press_test_start())
         button2.place(x=140, y=220)
-        button3.place(x=140, y=360)
 
-        result_photo_label = tk.Label(self, text='Melhor resultado: ', font=BUTTON_FONT, fg="white", bg="#121212")
-        result_photo_label.place(x=550, y=105)
-
-        #result_image = ImageTk.PhotoImage(Image.open(image_path).resize((300, 225), Image.ANTIALIAS))
-        #img_label = Label(self, image=result_image)
-        #img_label.image = result_image
-        #img_label.place(x=550, y=130)
-
-        result_photo_label = tk.Label(self, text='Média Resultado: ', font=BUTTON_FONT, fg="white", bg="#121212")
-        result_photo_label.place(x=550, y=380)
-
-        result_text = "Isto é um exemplo de resultado"
-        result_text_widget = Text(self, height=8, width=40)
-        result_text_widget.insert(tk.END, result_text)
-        result_text_widget.configure(state='disabled')
-        result_text_widget.place(x=550, y=420)
-
-#def get_iterations(n_iterations_entry):
-#    return n_iterations_entry
-
-#def get_size_of_pop(n_population_entry):
-#    return n_population_entry
+"""
+Nome: get_operator
+Desc.: Obtem o número operador selecinado pelo utilizador
+Input: operator_options: string
+Returns: 0, 1, 2
+"""
 
 def get_operator(operator_options):
     if operator_options == "Sobel Operator":
@@ -151,19 +117,87 @@ def get_operator(operator_options):
     else:
         pass
 
+"""
+Nome: get_operator_string
+Desc.: Obtem o nome do operador selecinado pelo utilizador
+Input: operator: int
+Returns: "Sobel Operator" / "Robinson Operator" / "Fri-Chen Operator"
+"""
+def get_operator_string(operator):
+    if operator == 0:
+        return "Sobel Operator"
+    elif operator == 1:
+        return "Robinson Operator"
+    elif operator == 2:
+        return "Fri-Chen Operator"
+    else:
+        pass
 
-def stop_execution():
-    import sys
-    sys.exit()
 
-def press_start_button(iterations, size_of_pop, operator):
-    print("iterations: ", iterations, "| size_of_pop:", size_of_pop, "| operator:", operator)
-    train.training(int(iterations), int(size_of_pop), int(operator))
+"""
+Nome: close_gui
+Desc.: Fecha a GUI
+"""
 
+def close_gui():
+    keyboard = Controller()
+    keyboard.press(Key.alt)
+    keyboard.press(Key.f4)
+    keyboard.release(Key.alt)
+    keyboard.release(Key.f4)
+
+
+"""
+Nome: press_train_start
+Desc.: Obtem o nome do operador selecinado pelo utilizador
+Input: iterations = int, size_of_pop = int, operator = int
+"""
+
+def press_train_start(iterations, size_of_pop, operator):
+    print("Iterations: {} | Size of population: {} | Operator: {}".format(iterations, size_of_pop, get_operator_string(operator)))
+    f = open("parameters.txt", "w+")
+    f.write("{}\n{}\n{}".format(iterations, size_of_pop, operator))
+    f.close()
+    run_train()
+    close_gui()
+
+
+"""
+Nome: press_train_start
+Desc.: Corre a opção treino selecionada pelo utilizador
+"""
+
+def press_test_start():
+    run_test()
+    close_gui()
+
+
+"""
+Nome: run_test
+Desc.: Avisa a main da execução do teste
+"""
+
+def run_test():
+    return 1
+
+
+"""
+Nome: run_train
+Desc.: Avisa a main da execução do treino
+"""
+
+def run_train():
+    return 1
+
+
+"""
+Nome: start
+Desc.: Executa a GUI
+"""
 
 def start():
     app = App()
     app.mainloop()
 
-if __name__ == "__main__":
-    start()
+#if __name__ == "__main__":
+#    start()

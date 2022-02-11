@@ -1,7 +1,6 @@
-# import ploting
-
 import prettyprint
 import random
+from datetime import datetime
 import time
 import numpy as np
 import glob
@@ -17,15 +16,11 @@ rng = np.random.default_rng()
 
 
 class DefinicoesClassificador:
-    src_path = "./TestImages/Test"  # Diretorio de todas as imagens de trieno
-    # Diretorio das images de teste originais
+    src_path = "../TestImages/Test"
     src_path_original = glob.glob(src_path + "/*/Original/*")
-    # Diretorio das images de teste perfeitas
     src_path_perfect = glob.glob(src_path + "/*/Perfect/*")
-    # Diretorio das images de teste resultantes
-    src_path_results = "./TestImages/Results/Images/TestResults/Images/"
-    # Diretorio do ficheiro .txt com informação relativa ao teste
-    src_path_results_text = "./TestImages/Results/TestResults/Text/"
+    src_path_results = "../TestImages/Results/TestResults/Images/"
+    src_path_results_text = "../TestImages/Results/TestResults/Text/"
 
 
 """
@@ -68,27 +63,16 @@ def selecionar_da_populacao(n: int, populacao: list):
     return new_pop
 
 
-"""
-Nome: apply_genoma
-Desc.: Aplica o genoma
-Input: genoma, g_normals, lista_genoma, lista_distancia, imagem_float, imagem_float_perfeita,y
-"""
-
-
 def apply_genoma(genoma, g_normals, lista_genomas, lista_distancias, imagem_float, imagem_perfeita_float):
     # input: genoma, g_normals, lista_genoma, lista_distancia, imagem_float, imagem_float_perfeita,y
     # alterado: lista_genomas, lista_distancia, g_normals
     hX = genoma
-    hY = np.transpose(hX)  # Obtem a matriz transposta de hX(genoma)
+    hY = np.transpose(hX)
 
-    # Convolução da imagem pelo genoma
     gX = scipy.ndimage.convolve(imagem_float, hX)
-    # Convolução da imagem pela transposição do genoma
     gY = scipy.ndimage.convolve(imagem_float, hY)
-    # Obter o valor absoluto da soma dos arrays trabalhados
     g = np.abs(gX + gY)
-    g_normal = g * (255.0 / (scipy.ndimage.maximum(g) -
-                    scipy.ndimage.minimum(g)))
+    g_normal = g * (255.0 / (scipy.ndimage.maximum(g) - scipy.ndimage.minimum(g)))
 
     distancia = comparar_imagens(imagem_perfeita_float, g_normal)
     # LOCK
@@ -108,11 +92,10 @@ Returns:
 """
 
 
-def buscar_genoma(num_file):
-    input_file = open("./TestImages/Recover/gene.txt", 'r')
+def buscar_genoma():
+    input_file = open("../TestImages/Recover/gene.txt", 'r')
     gene_tmp = []
-    # Jumps to second line, since first line contains best result of operator
-    next(input_file)
+    next(input_file) # Jumps to second line, since first line contains best result of operator
     for i in input_file:
         gene_tmp.append(float(i))
     gene = np.array([gene_tmp[:3], [0, 0, 0], gene_tmp[3:]])
@@ -121,14 +104,10 @@ def buscar_genoma(num_file):
 
 if __name__ == '__main__':
     index = 0
-    num_file = len(
-        glob.glob(DefinicoesClassificador.src_path_results_text + 'results*.txt'))
-    # Ficheiro .txt usado para armazenar informação relativa ao teste realizado
-    output_file = open(DefinicoesClassificador.src_path_results_text +
-                       "results{}.txt".format(num_file + 1), 'w+')
-    # Lista com as fotos de teste originais
+    num_file = len(glob.glob(DefinicoesClassificador.src_path_results_text + 'results*.txt'))
+    output_file = open(DefinicoesClassificador.src_path_results_text + "results{}.txt".format(num_file + 1), 'w+')
     lista_de_teste = DefinicoesClassificador.src_path_original
-    iterations = 10  # Número de iterações a ser realizadas
+    iterations = 10
     minimum = "None"
 
     output_file.write(
@@ -148,9 +127,7 @@ if __name__ == '__main__':
     lowest = []
 
     for ficheiro_de_imagem in lista_de_teste:
-        # Lista para divir o diretorio de cada ficheiro um array
         lista_path.append(ficheiro_de_imagem.split('\\'))
-        # Buscar o valor do array que represneta o nome do ficheiro
         nome.append(lista_path[-1][-1])
         index = lista_de_teste.index(ficheiro_de_imagem)
         # Leitura de imagem a processar, resultando num np.array
@@ -167,17 +144,15 @@ if __name__ == '__main__':
     g_normals = []
     start_time = time.time()
     for y in range(total_img):
-        prettyprint.set_text(
-            "Index: {}/100 | File: {}".format(y + 2, nome[y], ))
+        prettyprint.set_text("Index: {}/100 | File: {}".format(y + 2, nome[y], ))
         thread = threading.Thread(target=apply_genoma, args=(genoma, g_normals, lista_genomas,
                                                              lista_distancias, imagem_float[y],
                                                              imagem_perfeita_float[y],))
         thread.start()
     while threading.active_count() > 2:
         pass
-    sorted(lowest, key=lambda x: x[0])
-    low = lowest[0]
 
+    low = min(lista_distancias)
     # ploting.animate(i, low)
     # output_file.write(
     #     "Minimum: {} | Iteration: {}/{} | File: {} \n Matrix: {}\n".format(low[0], i + 1,
@@ -187,4 +162,4 @@ if __name__ == '__main__':
     prettyprint.stop_animation()
     print("Lowest distance, ", low)
 
-print("--- Final time: %s seconds ---" % (time.time() - start_time))
+    print("--- Final time: %s seconds ---" % (time.time() - start_time))
