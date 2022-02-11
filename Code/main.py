@@ -1,5 +1,4 @@
 import os
-from Code.BetaCode import prettyprint
 import random
 import time
 import numpy as np
@@ -8,6 +7,7 @@ import scipy.ndimage
 import imageio
 import threading
 import gui_ed as gui
+from BetaCode import prettyprint
 
 global lock
 lock = threading.Lock()
@@ -23,6 +23,10 @@ class ClassifierDefinitions:
     src_path_original = glob.glob(src_path + "/*/Original/*")
     # Diretorio das images de treino perfeitas
     src_path_perfect = glob.glob(src_path + "/*/Perfect/*")
+    # Diretorio das images de teste originais
+    src_path_original_test = glob.glob(src_path_testing + "/*/Original/*")
+    # Diretorio das images de teste perfeitas
+    src_path_perfect_test = glob.glob(src_path_testing + "/*/Perfect/*")
     # Diretorio das images de treino resultantes
     src_path_results = "./TestImages/Results/Images/"
     # Diretorio do ficheiro .txt com informação relativa ao treino
@@ -160,6 +164,7 @@ Desc.: Gera mutações aleatoriamente em 1% da população
 Input: population -> list(genome);
 """
 
+
 def random_mutation(population: list):
     # Usar 10% da população
     num_random_alter = int(len(population) * 0.1)
@@ -242,9 +247,7 @@ def apply_image(population, population_results, perfect_image_float, image_float
     g_normals = []
     # Aplicação de genome
     for genome in population:
-        # Associar genomes a variáveis, sendo a Y transposta
-        # hX = np.array([[-1.0, -2.0, -1.0], [0, 0, 0], [1.0, 2.0, 1.0]])
-        # Start thread for filter aplication
+        # Aplicação de cada genoma a cada imagem
         thread = threading.Thread(target=apply_genome, args=(genome, g_normals, genome_list,
                                                              distance_list, image_float,
                                                              perfect_image_float,))
@@ -285,9 +288,9 @@ def recover(value, best_genome):
 
 
 """
-Nome: Buscar Genoma 
-Desc.: Recupera o melhor genome obtido pelos treinos
-Input: num_file: int
+Nome: get_genome 
+Desc.: Recupera o melhor genoma obtido pelos treinos
+Input: None
 Returns: 
 """
 
@@ -307,6 +310,7 @@ Nome: training
 Desc.: Corre o treino
 Input: iterations: int, size_of_pop: int, operator: int
 """
+
 
 def training(iterations, size_of_pop, operator):
     num_file = len(glob.glob(ClassifierDefinitions.src_path_results_text + 'results*.txt'))
@@ -398,9 +402,10 @@ Nome: testing
 Desc.: Corre o teste
 """
 
+
 def testing():
     # num_file = len(glob.glob(ClassifierDefinitions.src_path_results_text + 'results*.txt'))
-    test_list = ClassifierDefinitions.src_path_testing
+    test_list = ClassifierDefinitions.src_path_original_test
 
     prettyprint.start_animation()
     num_images = len(test_list)
@@ -409,24 +414,24 @@ def testing():
     path_list = []
     nome = []
 
-    for ficheiro_de_image in test_list:
-        path_list.append(ficheiro_de_image.split('\\'))
+    for image_file in test_list:
+        path_list.append(image_file.split('\\'))
         nome.append(path_list[-1][-1])
-        index = test_list.index(ficheiro_de_image)
+        index = test_list.index(image_file)
         # Leitura de image a processar, resultando num np.array
         image_float.append(
-            np.array(imageio.imread(ficheiro_de_image), dtype=np.float64))  # Converter data type a float64
+            np.array(imageio.imread(image_file), dtype=np.float64))  # Converter data type a float64
 
         # Leitura de image perfeita, resultando num np.array
         perfect_image_float.append(
-            np.array(imageio.imread(ClassifierDefinitions.src_path_perfect[index]), dtype=np.float64))
+            np.array(imageio.imread(ClassifierDefinitions.src_path_perfect_test[index]), dtype=np.float64))
 
     genome = get_genome()
     distance_list = []
     genome_list = []
     g_normals = []
     for i in range(num_images):
-        prettyprint.set_text("Index: {}/100 | File: {}".format(i + 2, nome[i], ))
+        prettyprint.set_text("Index: {}/{} | File: {}".format(i + 2,num_images+1, nome[i], ))
         thread = threading.Thread(target=apply_genome, args=(genome, g_normals, genome_list,
                                                              distance_list, image_float[i],
                                                              perfect_image_float[i],))
@@ -436,24 +441,31 @@ def testing():
 
     low = min(distance_list)
     prettyprint.stop_animation()
-    print("Lowest distance: {} | Average = {}".format(low, low / num_images))
+    print("Lowest distance: {} | Average Distance = {}".format(low, sum(distance_list) / num_images))
+
 
 """
 Nome: run
 Desc.: Corre a opção selecionada pelo utilizador
 """
 
+
 def run():
-    if gui.run_train() == 1:
+    f = open("parameters.txt", "r+")
+    lines = f.readlines()
+    test_or_train = int(lines[3])
+
+    if test_or_train == 1:  # Inicia Treino
         f = open("parameters.txt", "r+")
         lines = f.readlines()
         iterations, size_of_pop, operator = int(lines[0]), int(lines[1]), int(lines[2])
         f.close()
         training(iterations, size_of_pop, operator)
-    elif gui.run_test() == 1:
+    if test_or_train == 2:  # Inicia Teste
         testing()
     else:
         pass
+
 
 if __name__ == "__main__":
     gui.start()

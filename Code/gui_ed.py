@@ -1,9 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
+from pynput.keyboard import Key, Controller
 
 TITLE_FONT = ('Helvetica', 17, 'bold')
 BUTTON_FONT = ('Helvetica', 12, 'bold')
-from pynput.keyboard import Key, Controller
+
+global state
+state = 0
 
 class App(tk.Tk): #inherit tkinter
     def __init__(self, *args, **kwargs): #automatic startup fuction
@@ -79,9 +82,9 @@ class TrainPage(tk.Frame):
         operator_options['values'] = ("Sobel Operator", "Robinson Operator", "Fri-Chen Operator")
         operator_options.place(x=160, y=375)
 
-        button2 = tk.Button(self, text="Iniciar Treino", font=BUTTON_FONT, padx=40, pady=20, fg="white", bg="#363636",
+        buttonTraining = tk.Button(self, text="Iniciar Treino", font=BUTTON_FONT, padx=40, pady=20, fg="white", bg="#363636",
                             command=lambda: press_train_start(n_iterations_entry.get(), n_population_entry.get(), get_operator(operator_options.get())))
-        button2.place(x=250, y=440)
+        buttonTraining.place(x=250, y=440)
 
 class TestPage(tk.Frame):
     def __init__(self, parent, controller):
@@ -97,8 +100,8 @@ class TestPage(tk.Frame):
                             command=lambda: controller.show_frame(HomePage))
         button1.place(x=30, y=30)
 
-        button2 = tk.Button(self, text="Iniciar Teste ", font=BUTTON_FONT, padx=40, pady=20, fg="white", bg="#363636", command=lambda: press_test_start())
-        button2.place(x=140, y=220)
+        buttonTesting = tk.Button(self, text="Iniciar Teste ", font=BUTTON_FONT, padx=40, pady=20, fg="white", bg="#363636", command=lambda: press_test_start())
+        buttonTesting.place(x=140, y=220)
 
 """
 Nome: get_operator
@@ -154,40 +157,23 @@ Input: iterations = int, size_of_pop = int, operator = int
 """
 
 def press_train_start(iterations, size_of_pop, operator):
-    print("Iterations: {} | Size of population: {} | Operator: {}".format(iterations, size_of_pop, get_operator_string(operator)))
+    print("Iterations: {} | Size of population: {} | Base Operator: {}".format(iterations, size_of_pop, get_operator_string(operator)))
     f = open("parameters.txt", "w+")
-    f.write("{}\n{}\n{}".format(iterations, size_of_pop, operator))
+    f.write("{}\n{}\n{}\n{}".format(iterations, size_of_pop, operator, 1))
     f.close()
-    run_train()
     close_gui()
 
 
 """
-Nome: press_train_start
-Desc.: Corre a opção treino selecionada pelo utilizador
+Nome: press_test_start
+Desc.: Corre a opção teste selecionada pelo utilizador
 """
 
 def press_test_start():
-    run_test()
+    f = open("parameters.txt", "w+")
+    f.write("{}\n{}\n{}\n{}".format(0, 0, 0, 2))
+    f.close()
     close_gui()
-
-
-"""
-Nome: run_test
-Desc.: Avisa a main da execução do teste
-"""
-
-def run_test():
-    return 1
-
-
-"""
-Nome: run_train
-Desc.: Avisa a main da execução do treino
-"""
-
-def run_train():
-    return 1
 
 
 """

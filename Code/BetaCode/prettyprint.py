@@ -16,7 +16,7 @@ def animate():
             break
         sys.stdout.write('\r' + text + " [Time Elapsed: {:4f} seconds]".format((time.time() - start_time)) + '\t')
         sys.stdout.flush()
-        time.sleep(1)
+        time.sleep(0.33)
     sys.stdout.write('\r' + text + " [Time Elapsed: {:4f} seconds]".format((time.time() - start_time)) + ' - done!     \t')
 
 # Call this to stop the whole shindig :slight_smile:
