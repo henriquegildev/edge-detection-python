@@ -8,16 +8,23 @@ BUTTON_FONT = ('Helvetica', 12, 'bold')
 global state
 state = 0
 
-class App(tk.Tk): #inherit tkinter
-    def __init__(self, *args, **kwargs): #automatic startup fuction
-        tk.Tk.__init__(self, *args, **kwargs) #args - varibles being passed / #kwargs - dictionaries passed
+class App(tk.Tk):
+    """Destinada criar a página, herda o Tkinter"""
+    def __init__(self, *args, **kwargs):
+        """App. Inicializa a todas as páginas da GUI e todos os seus atributos
+
+        :param self: acessar os atributos e métodos da classe
+        :param *args: variaveis a ser passadas
+        :param **kwargs: dicionarios a ser passados
+        """
+        tk.Tk.__init__(self, *args, **kwargs)
         tk.Tk.wm_title(self, "Sistema Inteligente para Deteção de Contornos em Imagens")
 
-        container = tk.Frame(self) #used populate the frame
-        container.pack(side="top", fill="both", expand=True) #pack configuration
+        container = tk.Frame(self) # popular o frame
+        container.pack(side="top", fill="both", expand=True) # configuração do pack
         container.grid_rowconfigure(0, weight=1)
         container.grid_columnconfigure(0, weight=1)
-        self.frames = {} #define a dictionary frame
+        self.frames = {} # define um dicionario de frames
 
         for F in (HomePage, TrainPage, TestPage):
             frame = F(container, self)
@@ -34,7 +41,14 @@ class App(tk.Tk): #inherit tkinter
         frame.tkraise()
 
 class HomePage(tk.Frame):
+    """A página principal da GUI"""
     def __init__(self, parent, controller):
+        """Home Page. Inicializa a página principal e todos os seus atributos
+
+        :param self: acessar os atributos e métodos da classe
+        :param *args: variaveis a ser passadas
+        :param **kwargs: dicionarios a ser passados
+        """
         tk.Frame.__init__(self, parent)
         tk.Tk.configure(self, bg='#121212')
         controller.resizable(False, False)
@@ -50,7 +64,14 @@ class HomePage(tk.Frame):
         button2.place(x=550, y=350)
 
 class TrainPage(tk.Frame):
+    """A página de treinos da GUI"""
     def __init__(self, parent, controller):
+        """Train Page. Inicializa a página de treinos e todos os seus atributos
+
+        :param self: acessar os atributos e métodos da classe em python
+        :param *args: variaveis a ser passadas
+        :param **kwargs: dicionarios a ser passados
+        """
         tk.Frame.__init__(self, parent)
         tk.Tk.configure(self, bg='#121212')
         controller.resizable(False, False)
@@ -87,7 +108,14 @@ class TrainPage(tk.Frame):
         buttonTraining.place(x=250, y=440)
 
 class TestPage(tk.Frame):
+    """A página de testes da GUI"""
     def __init__(self, parent, controller):
+        """Test Page. Inicializa a página de testes e todos os seus atributos
+
+        :param self: acessar os atributos e métodos da classe
+        :param *args: variaveis a ser passadas
+        :param **kwargs: dicionarios a ser passados
+        """
         tk.Frame.__init__(self, parent)
         tk.Tk.configure(self, bg='#121212')
         controller.resizable(False, False)
@@ -103,14 +131,13 @@ class TestPage(tk.Frame):
         buttonTesting = tk.Button(self, text="Iniciar Teste ", font=BUTTON_FONT, padx=40, pady=20, fg="white", bg="#363636", command=lambda: press_test_start())
         buttonTesting.place(x=140, y=220)
 
-"""
-Nome: get_operator
-Desc.: Obtem o número operador selecinado pelo utilizador
-Input: operator_options: string
-Returns: 0, 1, 2
-"""
 
 def get_operator(operator_options):
+    """Get operator. Obtem o número operador selecinado pelo utilizador
+
+    :param operator_options: string
+    :return: número do operador a ser utilizado: int
+    """
     if operator_options == "Sobel Operator":
         return 0
     elif operator_options == "Robinson Operator":
@@ -120,13 +147,13 @@ def get_operator(operator_options):
     else:
         pass
 
-"""
-Nome: get_operator_string
-Desc.: Obtem o nome do operador selecinado pelo utilizador
-Input: operator: int
-Returns: "Sobel Operator" / "Robinson Operator" / "Fri-Chen Operator"
-"""
+
 def get_operator_string(operator):
+    """Get operator string. Obtem o nome operador selecinado pelo utilizador
+
+    :param operator: int
+    :return: nome do operador: string
+    """
     if operator == 0:
         return "Sobel Operator"
     elif operator == 1:
@@ -137,12 +164,9 @@ def get_operator_string(operator):
         pass
 
 
-"""
-Nome: close_gui
-Desc.: Fecha a GUI
-"""
-
 def close_gui():
+    """Close GUI. Fecha a GUI"""
+
     keyboard = Controller()
     keyboard.press(Key.alt)
     keyboard.press(Key.f4)
@@ -150,13 +174,13 @@ def close_gui():
     keyboard.release(Key.f4)
 
 
-"""
-Nome: press_train_start
-Desc.: Obtem o nome do operador selecinado pelo utilizador
-Input: iterations = int, size_of_pop = int, operator = int
-"""
-
 def press_train_start(iterations, size_of_pop, operator):
+    """Press train start. Apresenta os parametros selecionados e escreve os parametros num ficheiro
+
+    :param iterations: int
+    :param size_of_pop: int
+    :param operator: int
+    """
     print("Iterations: {} | Size of population: {} | Base Operator: {}".format(iterations, size_of_pop, get_operator_string(operator)))
     f = open("parameters.txt", "w+")
     f.write("{}\n{}\n{}\n{}".format(iterations, size_of_pop, operator, 1))
@@ -164,24 +188,18 @@ def press_train_start(iterations, size_of_pop, operator):
     close_gui()
 
 
-"""
-Nome: press_test_start
-Desc.: Corre a opção teste selecionada pelo utilizador
-"""
-
 def press_test_start():
+    """Press test start. Escreve os parametros num ficheiro"""
+
     f = open("parameters.txt", "w+")
     f.write("{}\n{}\n{}\n{}".format(0, 0, 0, 2))
     f.close()
     close_gui()
 
 
-"""
-Nome: start
-Desc.: Executa a GUI
-"""
-
 def start():
+    """Start. Executa a GUI"""
+
     app = App()
     app.mainloop()
 
