@@ -1,3 +1,4 @@
+from datetime import datetime
 import os
 import random
 import time
@@ -17,6 +18,7 @@ rng = np.random.default_rng()
 
 
 class ClassifierDefinitions:
+    """Definition of image and output paths"""
     src_path = "./TestImages/Training"  # Diretorio de todas as imagens de treino
     src_path_testing = "./TestImages/Test"
     # Diretorio das images de treino originais
@@ -34,15 +36,6 @@ class ClassifierDefinitions:
     src_path_recover = "./TestImages/Recover/"
 
 
-"""
-Função que busca todas as imagens dentro da pasta indicada
-"""
-
-
-def get_training_list(path):
-    training_list = glob.glob(path + '/*')
-    return training_list
-
 
 """
 Função de custo, devolve a diferença entre a image perfeita e a image obtida pelo processo,
@@ -51,6 +44,13 @@ tendo em conta o tamanho da image.
 
 
 def compare_images(perfect, imperfect):
+    """
+    Compare Images. Função de custo, devolve a diferença entre a image perfeita e a image obtida pelo processo,
+    tendo em conta o tamanho da image.
+    :param perfect:
+    :param imperfect:
+    :return res:
+    """
     dif = np.abs(perfect - imperfect)
     res = np.sum(dif) / dif.size
     return res
@@ -65,6 +65,11 @@ Returns:
 
 
 def generate_genome(operator=0):
+    """
+    Generate Genome. Gera um genoma baseado no operador selecionado
+    :param operator: int
+    :return: np.array([X,Y,Z],[0,0,0],[W,U,V])
+    """
     if operator == 0:  # Sobel Operator
         return np.array([[rng.uniform(-1.1, -0.9), rng.uniform(-2.1, -1.9), rng.uniform(-1.1, -0.9)], [0, 0, 0],
                          [rng.uniform(0.9, 1.1), rng.uniform(1.9, 2.1), rng.uniform(0.9, 1.1)]])
@@ -84,10 +89,23 @@ Input: N -> int;
 
 
 def generate_population(n, operator):
+    """
+    Generate Population. Cria n número de genomas.
+    :param n: int
+    :param operator: int
+    :return: list(np.array([X,Y,Z],[0,0,0],[W,U,V]))
+    """
     return [generate_genome(operator) for _ in range(n)]
 
 
 def refill_population(n, population, operator):
+    """
+    Refil Population. Insere novos genomas na população,
+    :param n: int
+    :param population: list(np.array([X,Y,Z],[0,0,0],[W,U,V]))
+    :param operator: int
+    :return: new_pop: list(np.array([X,Y,Z],[0,0,0],[W,U,V]))
+    """
     for i in range(n):
         population.append(generate_genome(operator))
     return population
@@ -101,6 +119,12 @@ Input: population -> list(genome); compare_images -> original_image, processed_i
 
 
 def select_from_population(n: int, population: list):
+    """
+    Select From Population. Seleciona o top 10% da população.
+    :param n: int
+    :param population: list(np.array([X,Y,Z],[0,0,0],[W,U,V]))
+    :return: new_pop: list(np.array([X,Y,Z],[0,0,0],[W,U,V]))
+    """
     new_pop = []
     population.sort()
     new_pop_temp = population[:int(n * 0.1)]
@@ -117,6 +141,11 @@ Input: population -> list(genome); compare_images -> original_image, processed_i
 
 
 def crossover(population: list):
+    """
+    Crossover. Realiza a interseção aleatória entre dois genomas, para a uma percentagem da população.
+    :param population: list(np.array([X,Y,Z],[0,0,0],[W,U,V]))
+    :return: new_pop: list(np.array([X,Y,Z],[0,0,0],[W,U,V]))
+    """
     combinations = {}
     new_pop = []
     index = 0
@@ -132,7 +161,6 @@ def crossover(population: list):
             pass
         combinations[index].append(pos)
         rand = population[pos]
-        print("i:", i)
         # Criar listas com os valores de cima e de baixo do array g1
         g1_a, g1_b = list(i[0]), list(i[2])
         # Criar listas com os valores de cima e de baixo do array g2
@@ -144,11 +172,9 @@ def crossover(population: list):
         new_gene2_tmp_a = new_gene1_tmp[:num_cross] + new_gene2_tmp[num_cross:]
 
         # Adicionar os novos genes ao array dos novos genes 1
-        new_gene1 = np.array(
-            [new_gene1_tmp_a[:3], [0, 0, 0], new_gene1_tmp_a[3:]])
+        new_gene1 = np.array([new_gene1_tmp_a[:3], [0, 0, 0], new_gene1_tmp_a[3:]])
         # Adicionar os novos genes ao array dos novos genes 2
-        new_gene2 = np.array(
-            [new_gene2_tmp_a[:3], [0, 0, 0], new_gene2_tmp_a[3:]])
+        new_gene2 = np.array([new_gene2_tmp_a[:3], [0, 0, 0], new_gene2_tmp_a[3:]])
         # Adcionar o gene 1 ao array da nova população
         new_pop.append(new_gene1)
         # Adcionar o gene 2 ao array da nova população
@@ -166,6 +192,11 @@ Input: population -> list(genome);
 
 
 def random_mutation(population: list):
+    """
+    Random Mutation. Realiza mutações aleatórias a elementos aleatórios.
+    :param population: list(np.array([X,Y,Z],[0,0,0],[W,U,V]))
+    :return: new_pop : list(np.array([X,Y,Z],[0,0,0],[W,U,V]))
+    """
     # Usar 10% da população
     num_random_alter = int(len(population) * 0.1)
 
@@ -208,6 +239,16 @@ Input: genome, g_normals, lista_genome, distance_list image_float, image_float_p
 
 
 def apply_genome(genome, g_normals, genome_list, distance_list, image_float, perfect_image_float):
+    """Apply Genome. Aplicação do genoma à imagem, obtendo a diferença entre a imagem objetivo e a obtida.
+    :param genome: np.array([X,Y,Z],[0,0,0],[W,U,V])
+    :param g_normals: list
+    :param genome_list: list
+    :param distance_list: list
+    :param image_float: np.array(np.float64) - imageio.imread result matrix
+    :param perfect_image_float: np.array(np.float64) - imageio.imread result matrix
+    :return: g_normals: list(float)
+    :return: distance_list: list(int)
+    """
     # input: genome, g_normals, lista_genome, distance_list image_float, image_float_perfeita,y
     # alterado: genome_list, distance_list g_normals
     hX = genome
@@ -240,6 +281,16 @@ Input: population_results, perfect_image_float, image_float : float, lowest : li
 
 
 def apply_image(population, population_results, perfect_image_float, image_float, lowest, nome, i):
+    """
+    Apply Image. Aplicação de cada genoma na população em cada imagem da lista.
+    :param population: list(np.array([X,Y,Z],[0,0,0],[W,U,V]),...)
+    :param population_results: list((minimum, np.array([X,Y,Z],[0,0,0],[W,U,V])),...)
+    :param perfect_image_float: np.array(np.float64) - imageio.imread result matrix
+    :param image_float: np.array(np.float64) - imageio.imread result matrix
+    :param lowest: list
+    :param nome: string
+    :param i: int - iteration
+    """
     # input : population_results, perfect_image_float,image_float,lowest,y
     # output: population_results, lowest
     distance_list = []
@@ -279,6 +330,11 @@ Input: value, best_genome, num_file
 
 
 def recover(value, best_genome):
+    """
+    Recover. Guarda o melhor genoma obtido num ficheiro de texto.
+    :param value: int - valor minimo da distância obtido pelo genoma
+    :param best_genome: np.array([X,Y,Z],[0,0,0],[W,U,V]) - melhor genoma obtido durante o treino
+    """
     out = open(ClassifierDefinitions.src_path_recover + "gene.txt", 'w+')
     gene = list(best_genome[0]) + list(best_genome[2])
     out.write("Distancia: {} | Media: ".format(value) + "\n")
@@ -296,6 +352,11 @@ Returns:
 
 
 def get_genome():
+    """
+    Get Genome. Obtenção do melhor genoma obtido pelo treino, localizado no diretório "./TestImages/Recover/".
+    Através do ficheiro "gene.txt".
+    :return gene : np.array([X,Y,Z],[0,0,0],[W,U,V])
+    """
     input_file = open(ClassifierDefinitions.src_path_recover + "/gene.txt", 'r')
     gene_tmp = []
     next(input_file)  # Jumps to second line, since first line contains best result of operator
@@ -313,9 +374,15 @@ Input: iterations: int, size_of_pop: int, operator: int
 
 
 def training(iterations, size_of_pop, operator):
+    """
+    Training. Função chamada para iniciar o treino do modelo.
+    :param iterations: int
+    :param size_of_pop: int
+    :param operator: int
+    """
     num_file = len(glob.glob(ClassifierDefinitions.src_path_results_text + 'results*.txt'))
     # Ficheiro .txt usado para armazenar informação relativa ao treino realizado
-    # output_file = open("./TestImages/Results/Text/results.txt", 'w+')
+    output_file = open("./TestImages/Results/Text/results{}.txt".format(num_file+1), 'w+')
 
     # Lista com as fotos originais
     training_list = ClassifierDefinitions.src_path_original
@@ -323,12 +390,12 @@ def training(iterations, size_of_pop, operator):
     # Definição do tamanho da população e sua criação
     population = generate_population(size_of_pop, operator)
     # Formação do output do programa
-    # output_file.write(
-    #    "Run Begin Time: {} | Run Number: {} | Projected Iterations: {} | Size of Population: {}\n".format(
-    #        datetime.now(),
-    #        num_file,
-    #        iterations,
-    #        size_of_pop))
+    output_file.write(
+        "Run Begin Time: {} | Run Number: {} | Projected Iterations: {} | Size of Population: {}\n".format(
+            datetime.now(),
+            num_file,
+            iterations,
+            size_of_pop))
 
     prettyprint.start_animation()
     # Numero total de imagens a ser processadas
@@ -383,18 +450,17 @@ def training(iterations, size_of_pop, operator):
         sorted(lowest, key=lambda x: x[0])
         low = lowest[0]
 
-        # output_file.write(
-        #    "Minimum: {} | Iteration: {}/{} | \n Matrix: {}\n".format(low[0], i + 1,
-        #                                                              iterations, low[1]))
+        output_file.write(
+            "Minimum: {} | Iteration: {}/{} | \n Matrix: {}\n".format(low[0], i + 1,
+                                                                      iterations, low[1]))
     sorted(lowest, key=lambda x: x[0])
     low = lowest[0]
     recover(low[0], low[1])
-    # output_file.write(
-    #    "--- Final Time: {:4f} seconds ---".format(time.time() - start_time))
-    # output_file.close()
+    output_file.write(
+        "--- Final Time: {:4f} seconds ---".format(time.time() - start_time))
+    output_file.close()
     prettyprint.stop_animation()
-
-    print("--- Final time: %s seconds ---" % (time.time() - start_time))
+    #print("--- Final time: %s seconds ---" % (time.time() - start_time))
 
 
 """
@@ -404,6 +470,7 @@ Desc.: Corre o teste
 
 
 def testing():
+    """Testing. Função chamada para testar o modelo."""
     # num_file = len(glob.glob(ClassifierDefinitions.src_path_results_text + 'results*.txt'))
     test_list = ClassifierDefinitions.src_path_original_test
 
@@ -431,7 +498,7 @@ def testing():
     genome_list = []
     g_normals = []
     for i in range(num_images):
-        prettyprint.set_text("Index: {}/{} | File: {}".format(i + 2,num_images+1, nome[i], ))
+        prettyprint.set_text("Index: {}/{} | File: {}".format(i + 2, num_images + 1, nome[i], ))
         thread = threading.Thread(target=apply_genome, args=(genome, g_normals, genome_list,
                                                              distance_list, image_float[i],
                                                              perfect_image_float[i],))
@@ -451,6 +518,7 @@ Desc.: Corre a opção selecionada pelo utilizador
 
 
 def run():
+    """Função que corre o programa consuante seja desejado treinar ou testar."""
     f = open("parameters.txt", "r+")
     lines = f.readlines()
     test_or_train = int(lines[3])
