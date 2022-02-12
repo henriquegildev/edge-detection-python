@@ -29,8 +29,10 @@ class ClassifierDefinitions:
     src_path_original_test = glob.glob(src_path_testing + "/*/Original/*")
     # Diretorio das images de teste perfeitas
     src_path_perfect_test = glob.glob(src_path_testing + "/*/Perfect/*")
-    # Diretorio das images de treino resultantes
+    # Diretorio das images resultantes do treino
     src_path_results = "./TestImages/Results/Images/"
+    # Diretorio das images de resultantes do teste
+    src_path_test_results = "./TestImages/Results/TestResults/Images/"
     # Diretorio do ficheiro .txt com informação relativa ao treino
     src_path_results_text = "./TestImages/Results/Text/"
     src_path_recover = "./TestImages/Recover/"
@@ -294,7 +296,7 @@ def get_genome():
     Get Genome. Obtenção do melhor genoma obtido pelo treino, localizado no diretório "./TestImages/Recover/".
     Através do ficheiro "gene.txt"
 
-    :return gene : np.array([X,Y,Z],[0,0,0],[W,U,V])
+    :return: gene : np.array([X,Y,Z],[0,0,0],[W,U,V])
     """
     input_file = open(ClassifierDefinitions.src_path_recover + "/gene.txt", 'r')
     gene_tmp = []
@@ -432,7 +434,10 @@ def testing():
         thread.start()
     while threading.active_count() > 2:
         pass
-
+    count = 0
+    for img in g_normals:
+        imageio.imwrite(ClassifierDefinitions.src_path_test_results + 'result_test_{}_{}'.format(distance_list[count], nome[count]), img.astype(np.uint8))
+        count += 1
     low = min(distance_list)
     prettyprint.stop_animation()
     print("Lowest distance: {} | Average Distance = {}".format(low, sum(distance_list) / num_images))
