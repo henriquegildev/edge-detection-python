@@ -1,5 +1,4 @@
 import tkinter as tk
-from tkinter import ttk
 from pynput.keyboard import Key, Controller
 
 TITLE_FONT = ('Helvetica', 17, 'bold')
@@ -99,7 +98,7 @@ class TrainPage(tk.Frame):
         choose_operator_label = tk.Label(self, text='Escolha um operador base: ', font=BUTTON_FONT, fg="white", bg="#121212")
         choose_operator_label.place(x=160, y=345)
         choose_operator = tk.StringVar()
-        operator_options = ttk.Combobox(self, width=42, textvariable=choose_operator)
+        operator_options = tk.ttk.Combobox(self, width=42, textvariable=choose_operator)
         operator_options['values'] = ("Sobel Operator", "Robinson Operator", "Fri-Chen Operator")
         operator_options.place(x=160, y=375)
 

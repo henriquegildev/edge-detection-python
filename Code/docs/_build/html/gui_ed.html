@@ -75,6 +75,7 @@
 <dt id="gui_ed.App">
 <em class="property">class </em><code class="descclassname">gui_ed.</code><code class="descname">App</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#gui_ed.App" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tkinter.Tk</span></code></p>
+<p>Destinada criar a página, herda o Tkinter</p>
 <dl class="method">
 <dt id="gui_ed.App.show_frame">
 <code class="descname">show_frame</code><span class="sig-paren">(</span><em>cont</em><span class="sig-paren">)</span><a class="headerlink" href="#gui_ed.App.show_frame" title="Permalink to this definition">¶</a></dt>
@@ -86,49 +87,91 @@
 <dt id="gui_ed.HomePage">
 <em class="property">class </em><code class="descclassname">gui_ed.</code><code class="descname">HomePage</code><span class="sig-paren">(</span><em>parent</em>, <em>controller</em><span class="sig-paren">)</span><a class="headerlink" href="#gui_ed.HomePage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tkinter.Frame</span></code></p>
+<p>A página principal da GUI</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="gui_ed.TestPage">
 <em class="property">class </em><code class="descclassname">gui_ed.</code><code class="descname">TestPage</code><span class="sig-paren">(</span><em>parent</em>, <em>controller</em><span class="sig-paren">)</span><a class="headerlink" href="#gui_ed.TestPage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tkinter.Frame</span></code></p>
+<p>A página de testes da GUI</p>
 </dd></dl>
 
 <dl class="class">
 <dt id="gui_ed.TrainPage">
 <em class="property">class </em><code class="descclassname">gui_ed.</code><code class="descname">TrainPage</code><span class="sig-paren">(</span><em>parent</em>, <em>controller</em><span class="sig-paren">)</span><a class="headerlink" href="#gui_ed.TrainPage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">tkinter.Frame</span></code></p>
+<p>A página de treinos da GUI</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="gui_ed.close_gui">
 <code class="descclassname">gui_ed.</code><code class="descname">close_gui</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gui_ed.close_gui" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Close GUI. Fecha a GUI</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="gui_ed.get_operator">
 <code class="descclassname">gui_ed.</code><code class="descname">get_operator</code><span class="sig-paren">(</span><em>operator_options</em><span class="sig-paren">)</span><a class="headerlink" href="#gui_ed.get_operator" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get operator. Obtem o número operador selecinado pelo utilizador</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>operator_options</strong> – string</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">número do operador a ser utilizado: int</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="gui_ed.get_operator_string">
 <code class="descclassname">gui_ed.</code><code class="descname">get_operator_string</code><span class="sig-paren">(</span><em>operator</em><span class="sig-paren">)</span><a class="headerlink" href="#gui_ed.get_operator_string" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Get operator string. Obtem o nome operador selecinado pelo utilizador</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>operator</strong> – int</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">nome do operador: string</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="gui_ed.press_test_start">
 <code class="descclassname">gui_ed.</code><code class="descname">press_test_start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gui_ed.press_test_start" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Press test start. Escreve os parametros num ficheiro</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="gui_ed.press_train_start">
 <code class="descclassname">gui_ed.</code><code class="descname">press_train_start</code><span class="sig-paren">(</span><em>iterations</em>, <em>size_of_pop</em>, <em>operator</em><span class="sig-paren">)</span><a class="headerlink" href="#gui_ed.press_train_start" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Press train start. Apresenta os parametros selecionados e escreve os parametros num ficheiro</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>iterations</strong> – int</li>
+<li><strong>size_of_pop</strong> – int</li>
+<li><strong>operator</strong> – int</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 <dl class="function">
 <dt id="gui_ed.start">
 <code class="descclassname">gui_ed.</code><code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#gui_ed.start" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Start. Executa a GUI</p>
+</dd></dl>
 
 </div>
 
