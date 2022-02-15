@@ -344,7 +344,7 @@ def training(iterations, size_of_pop, operator):
 
     for image_file in training_list:
         # Lista para divir o diretorio de cada ficheiro um array
-        path_list.append(image_file.split('\\'))
+        path_list.append(image_file.split('\\')) # Alterar para .split('/') se for Linux
         # Buscar o valor do array que represneta o nome do ficheiro
         name.append(path_list[-1][-1])
         index = training_list.index(image_file)
@@ -458,7 +458,7 @@ def run():
     if test_or_train == 2:  # Inicia Teste
         testing()
     else:
-        pass
+        exit(0)
 
 
 if __name__ == "__main__":

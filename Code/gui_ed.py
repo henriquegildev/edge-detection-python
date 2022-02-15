@@ -84,19 +84,19 @@ class TrainPage(tk.Frame):
                             command=lambda: controller.show_frame(HomePage))
         button1.place(x=30, y=30)
 
-        n_iterations_label = tk.Label(self, text='Introduza o número de iterações: ', font=BUTTON_FONT, fg="white", bg="#121212")
+        n_iterations_label = tk.Label(self, text='Introduza o número de iterações: -> X', font=BUTTON_FONT, fg="white", bg="#121212")
         n_iterations_label.place(x=160, y=200)
         n_iterations_entry = tk.Entry(self, font=BUTTON_FONT, width=30)
         n_iterations_entry.insert(0, "10")
         n_iterations_entry.place(x=160, y=230)
 
-        n_population_label = tk.Label(self, text='Introduza o número de população: ', font=BUTTON_FONT, fg="white", bg="#121212")
+        n_population_label = tk.Label(self, text='Introduza o número de população: -> Y', font=BUTTON_FONT, fg="white", bg="#121212")
         n_population_label.place(x=160, y=275)
         n_population_entry = tk.Entry(self, font=BUTTON_FONT, width=30)
         n_population_entry.insert(0, "1000")
         n_population_entry.place(x=160, y=305)
 
-        choose_operator_label = tk.Label(self, text='Escolha um operador base: ', font=BUTTON_FONT, fg="white", bg="#121212")
+        choose_operator_label = tk.Label(self, text='Escolha um operador base: -> Z', font=BUTTON_FONT, fg="white", bg="#121212")
         choose_operator_label.place(x=160, y=345)
         choose_operator = tk.StringVar()
         operator_options = tk.ttk.Combobox(self, width=42, textvariable=choose_operator)
@@ -110,11 +110,14 @@ class TrainPage(tk.Frame):
         script_details = tk.Label(self, text='Resumo do treino: ', font=BUTTON_FONT, fg="white", bg="#121212")
         script_details.place(x=550, y=190)
 
-        script_details = "Isto é um exemplo do resumo de treino"
+        script_details = "O treino tem como objetivo gerar um modelo/genoma óptimo para deteção de contornos, consoante a sua base.\n\nO treino correrá 'X' iterações.\nCom população de tamanho 'Y'.\nCom base o operador 'Z'."
         script_details_widget = tk.Text(self, height=8, width=40)
         script_details_widget.insert(tk.END, script_details)
         script_details_widget.configure(state='disabled')
         script_details_widget.place(x=550, y=230)
+
+
+
 
 class TestPage(tk.Frame):
     """A página de testes da GUI"""
@@ -143,7 +146,7 @@ class TestPage(tk.Frame):
         script_details = tk.Label(self, text='Resumo do teste: ', font=BUTTON_FONT, fg="white", bg="#121212")
         script_details.place(x=550, y=190)
 
-        script_details = "Isto é um exemplo do resumo de teste"
+        script_details = "O teste irá aplicar a todas as imagens  presentes na diretoria 'TestImages/Test', o melhor genoma obtido pelo treino."
         script_details_widget = tk.Text(self, height=8, width=40)
         script_details_widget.insert(tk.END, script_details)
         script_details_widget.configure(state='disabled')
@@ -208,7 +211,6 @@ def press_train_start(iterations, size_of_pop, operator):
 
 def press_test_start():
     """Press test start. Escreve os parametros num ficheiro"""
-
     f = open("parameters.txt", "w+")
     f.write("{}\n{}\n{}\n{}".format(0, 0, 0, 2))
     f.close()
@@ -217,7 +219,9 @@ def press_test_start():
 
 def start():
     """Start. Executa a GUI"""
-
+    f = open("parameters.txt", "w+")
+    f.write("{}\n{}\n{}\n{}".format(0, 0, 0, 0))
+    f.close()
     app = App()
     app.mainloop()
 
