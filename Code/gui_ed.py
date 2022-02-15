@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from pynput.keyboard import Key, Controller
 
 TITLE_FONT = ('Helvetica', 17, 'bold')
@@ -104,7 +105,16 @@ class TrainPage(tk.Frame):
 
         buttonTraining = tk.Button(self, text="Iniciar Treino", font=BUTTON_FONT, padx=40, pady=20, fg="white", bg="#363636",
                             command=lambda: press_train_start(n_iterations_entry.get(), n_population_entry.get(), get_operator(operator_options.get())))
-        buttonTraining.place(x=250, y=440)
+        buttonTraining.place(x=400, y=440)
+
+        script_details = tk.Label(self, text='Resumo do treino: ', font=BUTTON_FONT, fg="white", bg="#121212")
+        script_details.place(x=550, y=190)
+
+        script_details = "Isto é um exemplo do resumo de treino"
+        script_details_widget = tk.Text(self, height=8, width=40)
+        script_details_widget.insert(tk.END, script_details)
+        script_details_widget.configure(state='disabled')
+        script_details_widget.place(x=550, y=230)
 
 class TestPage(tk.Frame):
     """A página de testes da GUI"""
@@ -128,7 +138,16 @@ class TestPage(tk.Frame):
         button1.place(x=30, y=30)
 
         buttonTesting = tk.Button(self, text="Iniciar Teste ", font=BUTTON_FONT, padx=40, pady=20, fg="white", bg="#363636", command=lambda: press_test_start())
-        buttonTesting.place(x=140, y=220)
+        buttonTesting.place(x=140, y=260)
+
+        script_details = tk.Label(self, text='Resumo do teste: ', font=BUTTON_FONT, fg="white", bg="#121212")
+        script_details.place(x=550, y=190)
+
+        script_details = "Isto é um exemplo do resumo de teste"
+        script_details_widget = tk.Text(self, height=8, width=40)
+        script_details_widget.insert(tk.END, script_details)
+        script_details_widget.configure(state='disabled')
+        script_details_widget.place(x=550, y=230)
 
 
 def get_operator(operator_options):
