@@ -100,7 +100,7 @@ class TrainPage(tk.Frame):
         choose_operator_label.place(x=160, y=345)
         choose_operator = tk.StringVar()
         operator_options = tk.ttk.Combobox(self, width=42, textvariable=choose_operator)
-        operator_options['values'] = ("Sobel Operator", "Robinson Operator", "Fri-Chen Operator")
+        operator_options['values'] = ("Sobel Operator", "Prewitt Operator")
         operator_options.place(x=160, y=375)
 
         buttonTraining = tk.Button(self, text="Iniciar Treino", font=BUTTON_FONT, padx=40, pady=20, fg="white", bg="#363636",
@@ -161,10 +161,8 @@ def get_operator(operator_options):
     """
     if operator_options == "Sobel Operator":
         return 0
-    elif operator_options == "Robinson Operator":
+    elif operator_options == "Prewitt Operator":
         return 1
-    elif operator_options == "Fri-Chen Operator":
-        return 2
     else:
         pass
 
@@ -178,9 +176,7 @@ def get_operator_string(operator):
     if operator == 0:
         return "Sobel Operator"
     elif operator == 1:
-        return "Robinson Operator"
-    elif operator == 2:
-        return "Fri-Chen Operator"
+        return "Prewitt Operator"
     else:
         pass
 

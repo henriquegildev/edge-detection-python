@@ -62,12 +62,9 @@ def generate_genome(operator=0):
     if operator == 0:  # Sobel Operator
         return np.array([[rng.uniform(-1.1, -0.9), rng.uniform(-2.1, -1.9), rng.uniform(-1.1, -0.9)], [0, 0, 0],
                          [rng.uniform(0.9, 1.1), rng.uniform(1.9, 2.1), rng.uniform(0.9, 1.1)]])
-    elif operator == 1:  # Robinson Operator
+    elif operator == 1:  # Prewitt Operator
         return np.array([[rng.uniform(-1.1, -0.9), rng.uniform(-1.1, -0.9), rng.uniform(-1.1, -0.9)], [0, 0, 0],
                          [rng.uniform(0.9, 1.1), rng.uniform(0.9, 1.1), rng.uniform(0.9, 1.1)]])
-    elif operator == 2:  # Fri-Chen Operator
-        return np.array([[rng.uniform(-1.1, -0.9), rng.uniform(-1.5, -1.3), rng.uniform(-1.1, -0.9)], [0, 0, 0],
-                         [rng.uniform(0.9, 1.1), rng.uniform(1.3, 1.5), rng.uniform(0.9, 1.1)]])
 
 
 def generate_population(n, operator):
@@ -129,7 +126,7 @@ def crossover(population: list):
             if pos in combinations or population[pos] == i:
                 while index in combinations[pos]:
                     pos = randint(0, len(population) - 1)
-        except KeyError as err:
+        except KeyError or ValueError as err:
             pass
         combinations[index].append(pos)
         rand = population[pos]
@@ -325,12 +322,18 @@ def training(iterations, size_of_pop, operator):
     # Definição do tamanho da população e sua criação
     population = generate_population(size_of_pop, operator)
     # Formação do output do programa
+    operator_name = ""
+    if operator == 0:
+        operator_name = "Sobel"
+    elif operator == 1:
+        operator_name = "Prewitt"
+
     output_file.write(
-        "Run Begin Time: {} | Run Number: {} | Projected Iterations: {} | Size of Population: {}\n".format(
+        "Run Begin Time: {} | Run Number: {} | Projected Iterations: {} | Size of Population: {} | Base Operator: {}\n".format(
             datetime.now(),
             num_file,
             iterations,
-            size_of_pop))
+            size_of_pop, operator_name))
 
     prettyprint.start_animation()
     # Numero total de imagens a ser processadas
