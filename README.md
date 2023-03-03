@@ -4,4 +4,4 @@ Edge Detection Project using Scipy, Numpy, Threading amongst other things.
 
 Author's:
 Henrique Gil - @henriquegildev
-Gabriel Gomes @devgabrielgomes
+Gabriel Gomes - @devgabrielgomes
